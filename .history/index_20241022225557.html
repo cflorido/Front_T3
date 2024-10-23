@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación Visualización de Datos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #E5BEED;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #736B92;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background-color: #7D5C65;
+        }
+        #tablaEquipos {
+            width: 20%; /* 20% del ancho de la pantalla */
+            border-collapse: collapse;
+            text-align: left;
+        }
+        #tablaEquipos th, #tablaEquipos td {
+            border: 1px solid #736B92;
+            padding: 10px;
+        }
+        #tablaEquipos th {
+            background-color: #9593D9;
+            color: white;
+        }
+        #tablaEquipos td {
+            background-color: #fff;
+        }
+        #contenido {
+            width: 75%; /* 75% del ancho de la pantalla */
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #7C90DB;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #736B92;
+            padding: 10px;
+            text-align: center;
+            width: 14.28%;
+        }
+        th {
+            background-color: #9593D9;
+            color: white;
+            font-weight: bold;
+        }
+        td {
+            background-color: #ffffff;
+            transition: background-color 0.3s;
+        }
+        td.utilizado {
+            background-color: #7C90DB;
+            color: #ffffff;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #736B92;
+        }
+    </style>
+</head>
+<body>
+    <h1>Aplicación De Visualización de Resultados</h1>
+    <p>Desarrollada por Carol Florido y Natalia Villegas</p>
+
+    <input type="number" id="numeroLinea" placeholder="Número de línea" min="1" style="padding: 10px; font-size: 16px;">
+    <button onclick="cargarLinea()">Ver Línea</button>
+
+    <div class="container">
+        <!-- Tabla de equipos en el lado izquierdo -->
+        <table id="tablaEquipos">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>¿Se utiliza?</th>
+                    <th>Cantidad de equipos</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <!-- Contenedor de la tabla de horarios -->
+        <div id="contenido"></div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2024 Visualización de resultados tarea 3 Optimización Avanzada. Todos los derechos reservados.</p>
+    </div>
+
+    <script>
+        let lineas = []; // Array para almacenar las líneas del archivo
+        let equipos = []; // Array para almacenar la cantidad de equipos
+
+        // Función para cargar el contenido de los archivos
+        function cargarContenido() {
+            fetch('data.txt')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al cargar el archivo: ' + response.statusText);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    lineas = data.split('\n');
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('No se pudo cargar el contenido.');
+                });
+
+            // Cargar el contenido del archivo de equipos
+            fetch('equipos.txt')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al cargar el archivo de equipos: ' + response.statusText);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    equipos = data.split('\n').map(line => {
+                        const [numero, cantidad] = line.split(',').map(Number);
+                        return { numero, cantidad: parseFloat(cantidad).toFixed(3) }; // Redondear a 3 decimales
+                    });
+                    mostrarEquipos(); // Mostrar la tabla de equipos
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('No se pudo cargar el contenido de equipos.');
+                });
+        }
+
+        // Función para mostrar la tabla de equipos
+        function mostrarEquipos() {
+            const tablaEquiposBody = document.querySelector('#tablaEquipos tbody');
+            tablaEquiposBody.innerHTML = ''; // Limpiar el contenido previo
+
+            equipos.forEach(equipo => {
+                const fila = document.createElement('tr');
+                const celdaId = document.createElement('td');
+                const celdaUtiliza = document.createElement('td');
+                const celdaCantidad = document.createElement('td');
+
+                celdaId.textContent = equipo.numero;
+                celdaUtiliza.textContent = equipo.cantidad > 0 ? 'SI' : 'NO';
+                celdaCantidad.textContent = equipo.cantidad;
+
+                fila.appendChild(celdaId);
+                fila.appendChild(celdaUtiliza);
+                fila.appendChild(celdaCantidad);
+
+                tablaEquiposBody.appendChild(fila);
+            });
+        }
+
+        // Función para mostrar la línea seleccionada
+        function cargarLinea() {
+            const numeroLinea = document.getElementById("numeroLinea").value;
+            const contenidoDiv = document.getElementById("contenido");
+
+            // Verificar si el número de línea es válido
+            if (numeroLinea > 0 && numeroLinea <= lineas.length) {
+                const horario = JSON.parse("[" + lineas[numeroLinea - 1] + "]"); // Parsear la línea como JSON con corchetes
+                const equipoSeleccionado = equipos.find(e => e.numero === parseInt(numeroLinea));
+
+                // Mostrar la cantidad de equipos arriba del horario
+                contenidoDiv.innerHTML = `<h3>Cantidad de equipos: ${equipoSeleccionado ? equipoSeleccionado.cantidad : 'No disponible'}</h3>`;
+
+                mostrarHorario(horario); // Mostrar el horario en forma de tabla
+                contenidoDiv.style.display = 'block'; // Muestra el div
+            } else {
+                alert('Número de línea no válido. Intenta de nuevo.');
+            }
+        }
+
+        // Función para mostrar el horario en una tabla
+        function mostrarHorario(horario) {
+            const contenidoDiv = document.getElementById("contenido");
+
+            // Crear la tabla
+            const tabla = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            // Crear encabezado de la tabla
+            const encabezado = document.createElement('tr');
+            const dias = ['Franja Horaria', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+            dias.forEach(dia => {
+                const th = document.createElement('th');
+                th.textContent = dia;
+                encabezado.appendChild(th);
+            });
+            thead.appendChild(encabezado);
+            tabla.appendChild(thead);
+
+            // Crear filas de horarios
+            for (let i = 0; i < 12; i++) {
+                const fila = document.createElement('tr');
+
+                const horaInicio = (i * 2) % 24;
+                const horaFin = (horaInicio + 2) % 24;
+                const franjaHoraria = `${horaInicio < 10 ? '0' : ''}${horaInicio}:00 - ${horaFin < 10 ? '0' : ''}${horaFin}:00`;
+
+                const celdaFranja = document.createElement('td');
+                celdaFranja.textContent = franjaHoraria;
+                fila.appendChild(celdaFranja);
+
+                for (let j = 0; j < 7; j++) {
+                    const celda = document.createElement('td');
+                    celda.textContent = horario[i * 7 + j];
+                    if (horario[i * 7 + j] === 1) {
+                        celda.classList.add('utilizado'); // Agregar clase si se usa
+                    }
+                    fila.appendChild(celda);
+                }
+                tbody.appendChild(fila);
+            }
+
+            tabla.appendChild(tbody);
+            contenidoDiv.appendChild(tabla);
+        }
+
+        // Cargar el contenido de los archivos al iniciar la página
+        window.onload = cargarContenido;
+    </script>
+</body>
+</html>

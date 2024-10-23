@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Aplicación HTML Básica</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff; /* Color de fondo */
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #736B92; /* Color de fondo del botón */
+            color: white; /* Color del texto */
+            border: none; /* Sin borde */
+            border-radius: 5px; /* Bordes redondeados */
+            transition: background-color 0.3s; /* Efecto de transición */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra */
+        }
+        button:hover {
+            background-color: #7D5C65; /* Color más oscuro al pasar el mouse */
+        }
+        #contenido {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #7C90DB; /* Borde color */
+            background-color: #fff; /* Fondo blanco */
+            border-radius: 8px; /* Bordes redondeados */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Sombra */
+            display: none; /* Oculto por defecto */
+        }
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 80%;
+            border-radius: 8px; /* Bordes redondeados */
+            overflow: hidden; /* Esconde bordes */
+        }
+        th, td {
+            border: 1px solid #736B92; /* Borde de las celdas */
+            padding: 10px;
+            text-align: center;
+            width: 14.28%; /* Para que se divida el espacio en 7 columnas */
+        }
+        th {
+            background-color: #9593D9; /* Color de fondo del encabezado */
+            color: white; /* Color del texto en el encabezado */
+            font-weight: bold; /* Texto en negrita */
+        }
+        td {
+            background-color: #ffffff; /* Color de fondo de las celdas */
+            transition: background-color 0.3s; /* Efecto de transición */
+        }
+        td.utilizado {
+            background-color: #E5BEED; /* Color para las franjas utilizadas */
+            color: #58485c; /* Color del texto en las celdas utilizadas */
+            font-weight: bold; /* Texto en negrita */
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #736B92; /* Color del texto del pie de página */
+        }
+    </style>
+</head>
+<body>
+    <h1>B+</h1>
+    <p>Esta es una aplicación básica que se ejecuta localmente.</p>
+
+    <input type="number" id="numeroLinea" placeholder="Número de línea" min="1" style="padding: 10px; font-size: 16px;">
+    <button onclick="cargarLinea()">Ver Línea</button>
+
+    <div id="contenido"></div>
+
+    <div class="footer">
+        <p>&copy; 2024 Visulización de resultados tarea 3 Optimización Avanzada. Todos los derechos reservados.</p>
+    </div>
+
+    <script>
+        let lineas = []; // Array para almacenar las líneas del archivo
+
+        // Función para cargar el contenido del archivo y dividirlo en líneas
+        function cargarContenido() {
+            fetch('data.txt')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al cargar el archivo: ' + response.statusText);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    lineas = data.split('\n'); // Divide el contenido en líneas
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('No se pudo cargar el contenido.');
+                });
+        }
+
+        // Función para mostrar la línea seleccionada
+        function cargarLinea() {
+            const numeroLinea = document.getElementById("numeroLinea").value;
+            const contenidoDiv = document.getElementById("contenido");
+
+            // Verificar si el número de línea es válido
+            if (numeroLinea > 0 && numeroLinea <= lineas.length) {
+                const horario = JSON.parse(lineas[numeroLinea - 1]); // Parsear la línea como JSON
+                mostrarHorario(horario); // Mostrar el horario en forma de tabla
+                contenidoDiv.style.display = 'block'; // Muestra el div
+            } else {
+                alert('Número de línea no válido. Intenta de nuevo.');
+            }
+        }
+
+        // Función para mostrar el horario en una tabla
+        function mostrarHorario(horario) {
+            const contenidoDiv = document.getElementById("contenido");
+            contenidoDiv.innerHTML = ''; // Limpiar el contenido previo
+
+            // Crear la tabla
+            const tabla = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            // Crear encabezado de la tabla
+            const encabezado = document.createElement('tr');
+            const dias = ['Franja Horaria', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+            dias.forEach(dia => {
+                const th = document.createElement('th');
+                th.textContent = dia;
+                encabezado.appendChild(th);
+            });
+            thead.appendChild(encabezado);
+            tabla.appendChild(thead);
+
+            // Crear filas de horarios
+            for (let i = 0; i < 12; i++) { // 12 franjas horarias
+                const fila = document.createElement('tr');
+
+                // Calcular la franja horaria
+                const horaInicio = (i * 2) % 24;
+                const horaFin = (horaInicio + 2) % 24;
+                const franjaHoraria = `${horaInicio < 10 ? '0' : ''}${horaInicio}:00 - ${horaFin < 10 ? '0' : ''}${horaFin}:00`;
+                
+                // Añadir la franja horaria a la celda
+                const celdaFranja = document.createElement('td');
+                celdaFranja.textContent = franjaHoraria;
+                fila.appendChild(celdaFranja);
+
+                for (let j = 0; j < 7; j++) { // 7 días de la semana
+                    const celda = document.createElement('td');
+                    celda.textContent = horario[i * 7 + j]; // Calcular la posición en el array
+                    if (horario[i * 7 + j] === 1) {
+                        celda.classList.add('utilizado'); // Añadir clase si es utilizado
+                    }
+                    fila.appendChild(celda);
+                }
+                tbody.appendChild(fila);
+            }
+
+            tabla.appendChild(tbody);
+            contenidoDiv.appendChild(tabla);
+        }
+
+        // Cargar el contenido del archivo al inicio
+        cargarContenido();
+    </script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+Este es el contenido de data.txt.
+Aquí puedes poner cualquier información que desees mostrar.

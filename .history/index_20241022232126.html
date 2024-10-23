@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación Visualización de Datos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #E5BEED;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #736B92;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background-color: #7D5C65;
+        }
+        #tablaEquipos {
+            width: 20%; /* 20% del ancho de la pantalla */
+            border-collapse: collapse;
+            text-align: left;
+        }
+        #tablaEquipos th, #tablaEquipos td {
+            border: 1px solid #736B92;
+            padding: 10px;
+        }
+        #tablaEquipos th {
+            background-color: #9593D9;
+            color: white;
+        }
+        #tablaEquipos td {
+            background-color: #fff;
+        }
+        #contenido {
+            width: 75%; /* 75% del ancho de la pantalla */
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #7C90DB;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #736B92;
+            padding: 10px;
+            text-align: center;
+            width: 14.28%;
+        }
+        th {
+            background-color: #9593D9;
+            color: white;
+            font-weight: bold;
+        }
+        td {
+            background-color: #ffffff;
+            transition: background-color 0.3s;
+        }
+        td.utilizado {
+            background-color: #7C90DB;
+            color: #ffffff;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #736B92;
+        }
+        .info-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            margin: 0 10px;
+            padding: 10px;
+            background-color: #736B92;
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .titulo {
+            font-size: 2em; /* Tamaño del texto */
+            font-family: 'Arial', sans-serif; /* Tipo de letra elegante */
+            color: #4A4A4A; /* Color del texto */
+            text-align: center; /* Centrar texto */
+            margin: 20px 0; /* Espaciado superior e inferior */
+            padding: 20px; /* Espaciado interno */
+            border-bottom: 3px solid #736B92; /* Línea decorativa inferior */
+            background-color: rgba(255, 255, 255, 0.8); /* Fondo blanco con opacidad */
+            border-radius: 8px; /* Bordes redondeados */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+            transition: color 0.3s, transform 0.3s; /* Transición suave */
+        }
+
+        .titulo:hover {
+            color: #7D5C65; /* Cambiar color del texto al pasar el ratón */
+            transform: translateY(-3px); /* Efecto de desplazamiento al pasar el ratón */
+        }
+    </style>
+</head>
+<body>
+    <h1 class="titulo">Aplicación De Visualización de Resultados</h1>
+
+    <p>Desarrollada por Carol Florido y Natalia Villegas</p>
+
+    <!-- Botones para seleccionar la solución -->
+    <div>
+        <button id="solucion1" onclick="cambiarSolucion(1)">Solución 1</button>
+        <button id="solucion2" onclick="cambiarSolucion(2)">Solución 2</button>
+    </div>
+
+    <div class="info-container">
+        <div class="info-box">Total de columnas generadas: 169</div>
+        <div class="info-box" id="totalEquipos">Total de equipos: 12</div>
+        <div class="info-box" id="funcionObjetivo">Función objetivo: 450883.999</div>
+    </div>
+
+    <input type="number" id="numeroLinea" placeholder="Número de horario" min="1" style="padding: 10px; font-size: 16px;">
+    <button onclick="cargarLinea()">Ver Horario</button>
+
+    <div class="container">
+        <!-- Tabla de equipos en el lado izquierdo -->
+        <table id="tablaEquipos">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>¿Se utiliza?</th>
+                    <th>Cantidad de equipos</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <!-- Contenedor de la tabla de horarios -->
+        <div id="contenido"></div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2024 Visualización de resultados tarea 3 Optimización Avanzada. Todos los derechos reservados.</p>
+    </div>
+
+    <script>
+        let lineas = []; // Array para almacenar las líneas del archivo
+        let equipos = []; // Array para almacenar la cantidad de equipos
+        let solucionActual = 1; // Solución seleccionada por defecto
+
+        // Función para cargar el contenido de los archivos
+        function cargarContenido() {
+            const archivoEquipos = solucionActual === 1 ? 'equipos_1.txt' : 'equipos_2.txt';
+            const archivoData = solucionActual === 1 ? 'data_1.txt' : 'data_2.txt';
+
+            fetch(archivoData)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al cargar el archivo: ' + response.statusText);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    lineas = data.split('\n');
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('No se pudo cargar el contenido.');
+                });
+
+            // Cargar el contenido del archivo de equipos
+            fetch(archivoEquipos)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al cargar el archivo de equipos: ' + response.statusText);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    equipos = data.split('\n').map(line => {
+                        const [numero, cantidad] = line.split(',').map(Number);
+                        return { numero, cantidad: parseFloat(cantidad).toFixed(3) }; // Redondear a 3 decimales
+                    });
+                    mostrarEquipos(); // Mostrar la tabla de equipos
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('No se pudo cargar el contenido de equipos.');
+                });
+
+            // Actualizar la información del total de equipos y función objetivo
+            actualizarInfo();
+        }
+
+        // Función para actualizar la información según la solución actual
+        function actualizarInfo() {
+            const totalEquipos = solucionActual === 1 ? 16 : 12;
+            const funcionObjetivo = solucionActual === 1 ? 13 : 450883.999;
+
+            document.getElementById('totalEquipos').textContent = `Total de equipos: ${totalEquipos}`;
+            document.getElementById('funcionObjetivo').textContent = `Función objetivo: ${funcionObjetivo}`;
+        }
+
+        // Función para cambiar entre soluciones
+        function cambiarSolucion(solucion) {
+            solucionActual = solucion;
+            cargarContenido(); // Recargar contenido al cambiar de solución
+        }
+
+        // Función para mostrar la tabla de equipos
+        function mostrarEquipos() {
+            const tablaEquiposBody = document.querySelector('#tablaEquipos tbody');
+            tablaEquiposBody.innerHTML = ''; // Limpiar tabla antes de mostrar nuevos datos
+
+            equipos.forEach(equipo => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td>${equipo.numero}</td>
+                    <td>${equipo.cantidad > 0 ? 'Sí' : 'No'}</td>
+                    <td>${equipo.cantidad}</td>
+                `;
+                tablaEquiposBody.appendChild(fila);
+            });
+        }
+
+        // Función para cargar la línea según el número proporcionado
+        function cargarLinea() {
+            const numeroLinea = document.getElementById('numeroLinea').value;
+            const contenido = document.getElementById('contenido');
+            contenido.style.display = 'block'; // Mostrar el contenedor de la tabla de horarios
+
+            // Verificar que la línea solicitada esté dentro del rango
+            if (numeroLinea >= 1 && numeroLinea <= lineas.length) {
+                contenido.innerHTML = `<h2>Horario ${numeroLinea}</h2><pre>${lineas[numeroLinea - 1]}</pre>`;
+            } else {
+                contenido.innerHTML = `<h2>Horario ${numeroLinea} no disponible</h2>`;
+            }
+        }
+
+        // Cargar contenido inicial
+        cargarContenido();
+    </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Aplicación HTML Básica</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 80%;
+        }
+        th, td {
+            border: 1px solid #333;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #ddd;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bienvenido a mi Aplicación HTML</h1>
+    <p>Esta es una aplicación básica que se ejecuta localmente.</p>
+    <button onclick="mostrarTabla()">Haz clic aquí</button>
+
+    <table id="miTabla" class="hidden">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th>Ciudad</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Ana</td>
+                <td>28</td>
+                <td>Bogotá</td>
+            </tr>
+            <tr>
+                <td>Juan</td>
+                <td>32</td>
+                <td>Medellín</td>
+            </tr>
+            <tr>
+                <td>Lucía</td>
+                <td>25</td>
+                <td>Cali</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        function mostrarTabla() {
+            const tabla = document.getElementById("miTabla");
+            tabla.classList.toggle("hidden"); // Muestra u oculta la tabla
+        }
+    </script>
+</body>
+</html>
